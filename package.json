@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "start": "node app",
-    "devStart": "nodemon app"
+    "devStart": "nodemon app",
+    "serverStart": "NODE_ENV=development:* npm run devStart"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
