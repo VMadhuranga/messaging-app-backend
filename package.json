@@ -8,9 +8,12 @@
     "serverStart": "NODE_ENV=development:* npm run devStart"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-async-handler": "^1.2.0",
+    "express-validator": "^7.0.1",
     "mongoose": "^8.2.3",
     "morgan": "^1.10.0"
   },
