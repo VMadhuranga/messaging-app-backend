@@ -9,6 +9,7 @@ const connectDB = require("./config/dbConfig");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
+const signupRouter = require("./routes/signup-route");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -22,6 +23,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
+app.use("/", signupRouter);
 app.use("/users", usersRouter);
 
 app.use(errorHandler);
