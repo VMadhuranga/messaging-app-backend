@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node app",
     "devStart": "nodemon app",
-    "serverStart": "NODE_ENV=development:* npm run devStart"
+    "serverStart": "NODE_ENV=development:* npm run devStart",
+    "test": "mocha"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -24,7 +25,8 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
-    "mongodb-memory-server": "^9.1.7",
+    "mocha": "^10.4.0",
+    "mongodb-memory-server": "^9.1.8",
     "nodemon": "^3.1.0",
     "prettier": "3.2.5",
     "supertest": "^6.3.4"
