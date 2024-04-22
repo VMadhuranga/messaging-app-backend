@@ -7,9 +7,7 @@ const mongoose = require("mongoose");
 const errorHandler = require("./middlewares/errorHandler");
 const connectDB = require("./config/dbConfig");
 
-const indexRouter = require("./routes/index");
-const usersRouter = require("./routes/users");
-const signupRouter = require("./routes/signup-route");
+const userRouter = require("./routes/user-route");
 const loginRouter = require("./routes/login-route");
 
 const PORT = process.env.PORT || 3000;
@@ -23,10 +21,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/", signupRouter);
+app.use("/", userRouter);
 app.use("/", loginRouter);
-app.use("/users", usersRouter);
 
 app.use(errorHandler);
 
