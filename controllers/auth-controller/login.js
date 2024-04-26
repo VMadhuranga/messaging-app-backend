@@ -48,7 +48,6 @@ const login = [
     }
 
     const match = await bcrypt.compare(req.body.password, user.password);
-    console.log(match);
 
     if (!match) {
       await body("password")
