@@ -8,7 +8,7 @@ const errorHandler = require("./middlewares/errorHandler");
 const connectDB = require("./config/dbConfig");
 
 const userRouter = require("./routes/user-route");
-const loginRouter = require("./routes/login-route");
+const authRouter = require("./routes/auth-route");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -21,8 +21,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use("/", authRouter);
 app.use("/", userRouter);
-app.use("/", loginRouter);
 
 app.use(errorHandler);
 
