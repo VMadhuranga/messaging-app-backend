@@ -6,11 +6,12 @@
     "start": "node app",
     "devStart": "nodemon app",
     "serverStart": "NODE_ENV=development:* npm run devStart",
-    "test": "mocha"
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-handler": "^1.2.0",
@@ -26,7 +27,7 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
-    "mocha": "^10.4.0",
+    "jest": "^29.7.0",
     "mongodb-memory-server": "^9.1.8",
     "nodemon": "^3.1.0",
     "prettier": "3.2.5",
