@@ -1,6 +1,7 @@
 const express = require("express");
 const request = require("supertest");
 const bcrypt = require("bcryptjs");
+const authRouter = require("../../routes/auth-route");
 
 const UserModel = require("../../models/user-model");
 const userRouter = require("../../routes/user-route");
@@ -10,6 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+app.use("/", authRouter);
 app.use("/", userRouter);
 
 describe("PATCH /users/:user_id/username", () => {
@@ -27,7 +29,10 @@ describe("PATCH /users/:user_id/username", () => {
     password: "jd1234",
   };
 
-  it("should update user user name", async () => {
+  let userID;
+  let authHeader;
+
+  beforeEach(async () => {
     const newUser = new UserModel({
       firstName: testUser.first_name,
       lastName: testUser.last_name,
@@ -36,12 +41,26 @@ describe("PATCH /users/:user_id/username", () => {
     });
 
     const { id } = await newUser.save();
+    userID = id;
 
+    const loginResponse = await request(app).post("/login").send({
+      username: testUser.username,
+      password: testUser.password,
+    });
+
+    authHeader = {
+      field: "Authorization",
+      value: `Bearer ${loginResponse.body.accessToken}`,
+    };
+  });
+
+  it("should update user user name", async () => {
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${id}/username`)
-      .send({ username: "jdoe" });
+      .patch(`/users/${userID}/username`)
+      .send({ username: "jdoe" })
+      .set(authHeader.field, authHeader.value);
 
-    const updatedUser = await UserModel.findById(id).lean().exec();
+    const updatedUser = await UserModel.findById(userID).lean().exec();
 
     expect(updatedUser.userName).toBe("jdoe");
     expect(updateUserUsernameResponse.statusCode).toBe(200);
@@ -51,36 +70,20 @@ describe("PATCH /users/:user_id/username", () => {
   });
 
   it("should give error message if /:user_id is wrong", async () => {
-    const newUser = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
-    const { id } = await newUser.save();
-
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${id}123/username`)
-      .send({ username: "jdoe" });
+      .patch(`/users/${userID}123/username`)
+      .send({ username: "jdoe" })
+      .set(authHeader.field, authHeader.value);
 
     expect(updateUserUsernameResponse.statusCode).toBe(404);
     expect(updateUserUsernameResponse.body.message).toBe("Resource not found");
   });
 
   it("should give error message if user name is missing", async () => {
-    const newUser = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
-    const { id } = await newUser.save();
-
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${id}/username`)
-      .send({ username: "" });
+      .patch(`/users/${userID}/username`)
+      .send({ username: "" })
+      .set(authHeader.field, authHeader.value);
 
     const errors = updateUserUsernameResponse.body.data;
 
@@ -92,13 +95,6 @@ describe("PATCH /users/:user_id/username", () => {
   });
 
   it("should give error message if user name already exists", async () => {
-    const newUser1 = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
     const newUser2 = new UserModel({
       firstName: testUser2.first_name,
       lastName: testUser2.last_name,
@@ -106,12 +102,12 @@ describe("PATCH /users/:user_id/username", () => {
       password: await bcrypt.hash(testUser2.password, 10),
     });
 
-    const { id } = await newUser1.save();
     await newUser2.save();
 
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${id}/username`)
-      .send({ username: "jdoe" });
+      .patch(`/users/${userID}/username`)
+      .send({ username: "jdoe" })
+      .set(authHeader.field, authHeader.value);
 
     const error = updateUserUsernameResponse.body.data;
 
