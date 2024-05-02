@@ -4,6 +4,7 @@ const deleteUser = require("./delete-user");
 const updateUserFirstName = require("./update-user-first-name");
 const updateUserLastName = require("./update-user-last-name");
 const updateUserUsername = require("./update-user-username");
+const browsePeople = require("./browse-people");
 
 module.exports = {
   createUser,
@@ -12,4 +13,5 @@ module.exports = {
   updateUserFirstName,
   updateUserLastName,
   updateUserUsername,
+  browsePeople,
 };
