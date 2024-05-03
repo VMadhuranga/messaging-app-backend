@@ -6,7 +6,6 @@ const UserModel = require("../../models/user-model");
 const FriendModel = require("../../models/friend-model");
 const authRouter = require("../../routes/auth-route");
 const userRouter = require("../../routes/user-route");
-// const friendRouter = require("../../routes/friend-route");
 
 const app = express();
 
