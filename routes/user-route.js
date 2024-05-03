@@ -1,6 +1,7 @@
 const express = require("express");
 
 const userController = require("../controllers/user-controller/");
+const friendRouter = require("./friend-route");
 const authenticate = require("../middlewares/authenticate");
 
 const router = express.Router();
@@ -13,5 +14,6 @@ router.patch("/users/:user_id/first_name", userController.updateUserFirstName);
 router.patch("/users/:user_id/last_name", userController.updateUserLastName);
 router.patch("/users/:user_id/username", userController.updateUserUsername);
 router.get("/users/:user_id/people", userController.browsePeople);
+router.use("/users", friendRouter);
 
 module.exports = router;
