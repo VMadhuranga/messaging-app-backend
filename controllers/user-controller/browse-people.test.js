@@ -36,7 +36,8 @@ describe("GET /users/:user_id/people", () => {
     password: "dj1234",
   };
 
-  let userID;
+  let userID1;
+  let userID2;
   let authHeader;
 
   beforeEach(async () => {
@@ -61,10 +62,12 @@ describe("GET /users/:user_id/people", () => {
       password: await bcrypt.hash(testUser3.password, 10),
     });
 
-    const { id } = await newUser1.save();
-    userID = id;
-    await newUser2.save();
+    const { id: id1 } = await newUser1.save();
+    const { id: id2 } = await newUser2.save();
     await newUser3.save();
+
+    userID1 = id1;
+    userID2 = id2;
 
     const loginResponse = await request(app).post("/login").send({
       username: testUser1.username,
@@ -77,21 +80,40 @@ describe("GET /users/:user_id/people", () => {
     };
   });
 
-  it("should get users without current user", async () => {
+  it("should get users without current user and user's friends", async () => {
     const browsePeopleResponse = await request(app)
-      .get(`/users/${userID}/people`)
+      .get(`/users/${userID1}/people`)
       .set(authHeader.field, authHeader.value);
 
     const users = browsePeopleResponse.body.users;
 
     expect(browsePeopleResponse.statusCode).toBe(200);
     expect(browsePeopleResponse.body).toHaveProperty("users");
-    expect(users.find((user) => user.id === userID)).toBeFalsy();
+    expect(users.find((user) => user.id === userID1)).toBeFalsy();
+  });
+
+  it("should get users without already added friends", async () => {
+    await request(app)
+      .post(`/users/${userID1}/friends`)
+      .send({ friend_id: userID2 })
+      .set(authHeader.field, authHeader.value);
+
+    const browsePeopleResponse = await request(app)
+      .get(`/users/${userID1}/people`)
+      .set(authHeader.field, authHeader.value);
+
+    const users = browsePeopleResponse.body.users;
+
+    expect(browsePeopleResponse.statusCode).toBe(200);
+    expect(browsePeopleResponse.body).toHaveProperty("users");
+    expect(
+      users.every((user) => user.id !== userID1 && user.id !== userID2),
+    ).toBeTruthy();
   });
 
   it("should give error message if /:user_id is wrong", async () => {
     const browsePeopleResponse = await request(app)
-      .get(`/users/${userID}+123/people`)
+      .get(`/users/${userID1}+123/people`)
       .set(authHeader.field, authHeader.value);
 
     expect(browsePeopleResponse.statusCode).toBe(404);
