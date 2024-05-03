@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const { param, validationResult } = require("express-validator");
 
+const FriendModel = require("../../models/friend-model");
 const UserModel = require("../../models/user-model");
 
 const browsePeople = [
@@ -13,7 +14,16 @@ const browsePeople = [
       return res.status(404).json({ message: "Resource not found" });
     }
 
-    const users = await UserModel.find({ _id: { $ne: req.params.user_id } });
+    const friends = await FriendModel.find(
+      { userID: req.params.user_id },
+      "id",
+    );
+
+    const friendsIDs = friends.map((friend) => friend._id.toString());
+
+    const users = await UserModel.find({
+      _id: { $nin: [req.params.user_id, ...friendsIDs] },
+    });
 
     res.json({ users });
   }),
