@@ -8,5 +8,9 @@ router.post(
   "/:user_id/friends/:friend_id/messages",
   messageController.createMessage,
 );
+router.get(
+  "/:user_id/friends/:friend_id/messages",
+  messageController.getMessages,
+);
 
 module.exports = router;
