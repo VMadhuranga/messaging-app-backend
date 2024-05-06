@@ -2,6 +2,7 @@ const express = require("express");
 
 const userController = require("../controllers/user-controller/");
 const friendRouter = require("./friend-route");
+const messageRouter = require("./message-route");
 const authenticate = require("../middlewares/authenticate");
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.patch("/users/:user_id/last_name", userController.updateUserLastName);
 router.patch("/users/:user_id/username", userController.updateUserUsername);
 router.get("/users/:user_id/people", userController.browsePeople);
 router.use("/users", friendRouter);
+router.use("/users", messageRouter);
 
 module.exports = router;
