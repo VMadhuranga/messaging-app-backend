@@ -14,6 +14,7 @@ router.delete("/users/:user_id", userController.deleteUser);
 router.patch("/users/:user_id/first_name", userController.updateUserFirstName);
 router.patch("/users/:user_id/last_name", userController.updateUserLastName);
 router.patch("/users/:user_id/username", userController.updateUserUsername);
+router.patch("/users/:user_id/password", userController.updateUserPassword);
 router.get("/users/:user_id/people", userController.browsePeople);
 router.use("/users", friendRouter);
 router.use("/users", messageRouter);
