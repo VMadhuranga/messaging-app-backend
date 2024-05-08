@@ -116,7 +116,7 @@ describe("DELETE /users/:user_id/friends/:friend_id", () => {
       .send({
         friend_id: userID1,
       })
-      .set(authHeader.field, authHeader.value);
+      .set(friendAuthHeader.field, friendAuthHeader.value);
 
     await request(app)
       .post(`/users/${userID2}/friends/${userID1}/messages`)
