@@ -21,13 +21,12 @@ describe("POST /users", () => {
       confirm_password: "jd1234",
     };
 
-    const response = await request(app).post("/users").send(newUser);
-    expect(response.statusCode).toBe(201);
-
+    const createUserResponse = await request(app).post("/users").send(newUser);
     const user = await UserModel.findOne({ firstName: newUser.first_name })
       .lean()
       .exec();
 
+    expect(createUserResponse.statusCode).toBe(201);
     expect(user.firstName).toBe(newUser.first_name);
   });
 
@@ -40,17 +39,17 @@ describe("POST /users", () => {
       confirm_password: "jd1234",
     };
 
-    const response = await request(app).post("/users").send(newUser);
-    expect(response.statusCode).toBe(400);
+    const createUserResponse = await request(app).post("/users").send(newUser);
+    const errors = createUserResponse.body.data;
 
-    const error = JSON.parse(response.error.text);
-    expect(error.data.find(({ path }) => path === "first_name").msg).toBe(
+    expect(createUserResponse.statusCode).toBe(400);
+    expect(errors.find((error) => error.path === "first_name").msg).toBe(
       "First name is required",
     );
   });
 
   it("should give error message if user name already exists", async () => {
-    const user1 = {
+    const newUser1 = {
       first_name: "will",
       last_name: "smith",
       username: "ws",
@@ -58,7 +57,7 @@ describe("POST /users", () => {
       confirm_password: "ws1234",
     };
 
-    const user2 = {
+    const newUser2 = {
       first_name: "william",
       last_name: "summers",
       username: "ws",
@@ -66,14 +65,14 @@ describe("POST /users", () => {
       confirm_password: "ws1234",
     };
 
-    const user1Response = await request(app).post("/users").send(user1);
-    expect(user1Response.statusCode).toBe(201);
+    // create new user
+    await request(app).post("/users").send(newUser1);
 
-    const user2Response = await request(app).post("/users").send(user2);
+    const user2Response = await request(app).post("/users").send(newUser2);
+    const errors = user2Response.body.data;
+
     expect(user2Response.statusCode).toBe(400);
-
-    const error = JSON.parse(user2Response.error.text);
-    expect(error.data.find(({ path }) => path === "username").msg).toBe(
+    expect(errors.find((error) => error.path === "username").msg).toBe(
       "User already exist",
     );
   });
@@ -87,11 +86,11 @@ describe("POST /users", () => {
       confirm_password: "jd123",
     };
 
-    const response = await request(app).post("/users").send(newUser);
-    expect(response.statusCode).toBe(400);
+    const createUserResponse = await request(app).post("/users").send(newUser);
+    const errors = createUserResponse.body.data;
 
-    const error = JSON.parse(response.error.text);
-    expect(error.data.find(({ path }) => path === "confirm_password").msg).toBe(
+    expect(createUserResponse.statusCode).toBe(400);
+    expect(errors.find((error) => error.path === "confirm_password").msg).toBe(
       "Passwords do not match",
     );
   });
