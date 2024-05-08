@@ -92,7 +92,8 @@ describe("GET /users/:user_id/people", () => {
     expect(users.find((user) => user.id === userID1)).toBeFalsy();
   });
 
-  it("should get users without already added friends", async () => {
+  it("should get users without current user's friends", async () => {
+    // add friend to user's friend list
     await request(app)
       .post(`/users/${userID1}/friends`)
       .send({ friend_id: userID2 })
