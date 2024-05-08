@@ -52,8 +52,11 @@ describe("GET /users/:user_id", () => {
       .get(`/users/${userID}`)
       .set(authHeader.field, authHeader.value);
 
+    const user = await UserModel.findById(userID).lean().exec();
+
     expect(getUserResponse.statusCode).toBe(200);
     expect(getUserResponse.body).toHaveProperty("user");
+    expect(user.userName).toBe(testUser.username);
   });
 
   it("should give error message if /:user_id is wrong", async () => {
