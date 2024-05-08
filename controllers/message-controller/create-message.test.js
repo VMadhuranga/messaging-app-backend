@@ -67,6 +67,7 @@ describe("POST /users/:user_id/friends/:friend_id/messages", () => {
   });
 
   it("should create message", async () => {
+    // add friend to user's friend list
     await request(app)
       .post(`/users/${userID1}/friends`)
       .send({
@@ -96,6 +97,7 @@ describe("POST /users/:user_id/friends/:friend_id/messages", () => {
   });
 
   it("should give error message if /:user_id is wrong", async () => {
+    // add friend to user's friend list
     await request(app)
       .post(`/users/${userID1}/friends`)
       .send({
@@ -115,6 +117,7 @@ describe("POST /users/:user_id/friends/:friend_id/messages", () => {
   });
 
   it("should give error message if /:friend_id is wrong", async () => {
+    // add friend to user's friend list
     await request(app)
       .post(`/users/${userID1}/friends`)
       .send({
@@ -134,6 +137,7 @@ describe("POST /users/:user_id/friends/:friend_id/messages", () => {
   });
 
   it("should give error message if message is empty", async () => {
+    // add friend to user's friend list
     await request(app)
       .post(`/users/${userID1}/friends`)
       .send({
