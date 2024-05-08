@@ -37,9 +37,9 @@ describe("POST /login", () => {
       password: testUser.password,
     });
 
-    expect(loginResponse.body).toHaveProperty("accessToken");
-
     const cookie = loginResponse.headers["set-cookie"][0].split("=")[0];
+
+    expect(loginResponse.body).toHaveProperty("accessToken");
     expect(cookie).toBe("jwt");
   });
 
@@ -49,8 +49,9 @@ describe("POST /login", () => {
       password: testUser.password,
     });
 
-    const error = JSON.parse(loginResponse.error.text);
-    expect(error.data.find(({ path }) => path === "username").msg).toBe(
+    const errors = loginResponse.body.data;
+
+    expect(errors.find((error) => error.path === "username").msg).toBe(
       "Incorrect user name",
     );
   });
@@ -61,8 +62,9 @@ describe("POST /login", () => {
       password: "j",
     });
 
-    const error = JSON.parse(loginResponse.error.text);
-    expect(error.data.find(({ path }) => path === "password").msg).toBe(
+    const errors = loginResponse.body.data;
+
+    expect(errors.find((error) => error.path === "password").msg).toBe(
       "Incorrect password",
     );
   });
