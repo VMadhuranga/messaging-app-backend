@@ -100,6 +100,7 @@ describe("GET /users/:user_id/friends", () => {
   });
 
   it("should get current user's friends", async () => {
+    // add friends to user's friend list
     await request(app)
       .post(`/users/${userID1}/friends`)
       .send({
@@ -125,8 +126,15 @@ describe("GET /users/:user_id/friends", () => {
       .get(`/users/${userID1}/friends`)
       .set(authHeader.field, authHeader.value);
 
+    const friends = getFriendsResponse.body.friends;
+
     expect(getFriendsResponse.statusCode).toBe(200);
     expect(getFriendsResponse.body).toHaveProperty("friends");
+    expect(
+      friends.every((friend) =>
+        [userID2, userID3, userID4].includes(friend.friendID),
+      ),
+    ).toBeTruthy();
   });
 
   it("should get give empty array if current user doesn't have friends", async () => {
