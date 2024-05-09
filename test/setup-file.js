@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 
-beforeAll(async () => {
-  await mongoose.connect(process.env.MONGO_URI);
+let conn;
+beforeEach(async () => {
+  conn = await mongoose.connect(process.env.MONGO_URI);
 });
 
-afterAll(async () => {
+afterEach(async () => {
+  await conn.connection.db.dropDatabase();
   await mongoose.disconnect();
 });
