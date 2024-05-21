@@ -73,7 +73,7 @@ describe("POST /users", () => {
 
     expect(user2Response.statusCode).toBe(400);
     expect(errors.find((error) => error.path === "username").msg).toBe(
-      "User already exist",
+      "User with this username already exist",
     );
   });
 
