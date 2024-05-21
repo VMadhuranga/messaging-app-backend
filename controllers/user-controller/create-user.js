@@ -25,7 +25,7 @@ const createUser = [
         .lean()
         .exec();
       if (existingUser) {
-        throw new Error("User already exist");
+        throw new Error("User with this username already exist");
       }
     }),
   body("password")
