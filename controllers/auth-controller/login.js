@@ -66,7 +66,7 @@ const login = [
         username: user.userName,
       },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "1m" },
+      { expiresIn: "10s" },
     );
 
     const refreshToken = jwt.sign(
@@ -84,7 +84,7 @@ const login = [
       maxAge: 1 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
+    res.json({ accessToken, userId: user._id });
   }),
 ];
 
