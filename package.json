@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node app",
     "devStart": "nodemon app",
-    "serverStart": "NODE_ENV=development:* npm run devStart",
+    "serverStart": "NODE_ENV=development npm run devStart",
     "test": "jest --runInBand"
   },
   "dependencies": {
