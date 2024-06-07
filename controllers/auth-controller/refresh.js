@@ -33,10 +33,10 @@ const refresh = async (req, res) => {
           username: user.userName,
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "1m" },
+        { expiresIn: "10s" },
       );
 
-      res.json({ accessToken });
+      res.json({ accessToken, userId: user._id });
     }),
   );
 };
