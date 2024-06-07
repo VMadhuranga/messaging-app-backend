@@ -9,6 +9,7 @@ const helmet = require("helmet");
 const compression = require("compression");
 const errorHandler = require("./middlewares/errorHandler");
 const connectDB = require("./config/dbConfig");
+const { connectTestDB } = require("./config/testDbConfig");
 
 const userRouter = require("./routes/user-route");
 const authRouter = require("./routes/auth-route");
@@ -16,7 +17,11 @@ const authRouter = require("./routes/auth-route");
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-connectDB();
+if (process.env.NODE_ENV === "development") {
+  connectTestDB();
+} else {
+  connectDB();
+}
 
 app.use(logger("dev"));
 app.use(express.json());
