@@ -16,8 +16,8 @@ const getMessages = [
     }
 
     const friend = await FriendModel.findOne({
-      userID: req.params.user_id,
-      friendID: req.params.friend_id,
+      user: req.params.user_id,
+      friend: req.params.friend_id,
     })
       .lean()
       .exec();
@@ -26,19 +26,23 @@ const getMessages = [
       return res.status(400).json({ message: "Friend not found" });
     }
 
-    const userMessages = await MessageModel.find({
-      senderID: req.params.user_id,
-      receiverID: req.params.friend_id,
-    }).exec();
+    const userMessages = await MessageModel.find(
+      {
+        senderID: req.params.user_id,
+        receiverID: req.params.friend_id,
+      },
+      "content date senderID",
+    ).exec();
 
-    const friendMessages = await MessageModel.find({
-      senderID: req.params.friend_id,
-      receiverID: req.params.user_id,
-    }).exec();
+    const friendMessages = await MessageModel.find(
+      {
+        senderID: req.params.friend_id,
+        receiverID: req.params.user_id,
+      },
+      "content date senderID",
+    ).exec();
 
-    const messages = [...userMessages, ...friendMessages].sort(
-      (a, b) => a.date.getMilliseconds() - b.date.getMilliseconds(),
-    );
+    const messages = [...userMessages, ...friendMessages];
 
     res.json({ messages });
   }),
