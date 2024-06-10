@@ -13,9 +13,14 @@ const getFriends = [
       return res.status(404).json({ message: "Resource not found" });
     }
 
-    const friends = await FriendModel.find({
-      userID: req.params.user_id,
-    }).exec();
+    const friends = await FriendModel.find(
+      {
+        user: req.params.user_id,
+      },
+      "-_id -user",
+    )
+      .populate("friend", "firstName lastName userName")
+      .exec();
 
     res.json({ friends });
   }),
