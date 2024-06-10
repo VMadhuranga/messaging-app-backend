@@ -26,8 +26,13 @@ const deleteFriend = [
     }).exec();
 
     await FriendModel.findOneAndDelete({
-      userID: req.params.user_id,
-      friendID: req.params.friend_id,
+      user: req.params.user_id,
+      friend: req.params.friend_id,
+    }).exec();
+
+    await FriendModel.findOneAndDelete({
+      user: req.params.friend_id,
+      friend: req.params.user_id,
     }).exec();
 
     res.json({ message: "Friend deleted successfully" });
