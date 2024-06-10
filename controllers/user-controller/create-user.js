@@ -55,7 +55,7 @@ const createUser = [
       firstName: req.body.first_name,
       lastName: req.body.last_name,
       userName: req.body.username,
-      password: await bcrypt.hash(req.body.username, 10),
+      password: await bcrypt.hash(req.body.password, 10),
     });
 
     await newUser.save();
