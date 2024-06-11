@@ -15,17 +15,22 @@ const browsePeople = [
     }
 
     const friends = await FriendModel.find(
-      { userID: req.params.user_id },
-      "id",
-    );
+      { user: req.params.user_id },
+      "friend",
+    )
+      .lean()
+      .exec();
 
-    const friendsIDs = friends.map((friend) => friend._id.toString());
+    const friendsIDs = friends.map(({ friend }) => friend._id.toString());
 
-    const users = await UserModel.find({
-      _id: { $nin: [req.params.user_id, ...friendsIDs] },
-    });
+    const people = await UserModel.find(
+      {
+        _id: { $nin: [req.params.user_id, ...friendsIDs] },
+      },
+      "firstName lastName userName",
+    ).exec();
 
-    res.json({ users });
+    res.json({ people });
   }),
 ];
 
