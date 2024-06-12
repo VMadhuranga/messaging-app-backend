@@ -35,9 +35,17 @@ async function connectTestDB() {
     password: await bcrypt.hash("bg1234", 10),
   });
 
+  const testUser4 = new UserModel({
+    firstName: "steve",
+    lastName: "harvey",
+    userName: "sh",
+    password: await bcrypt.hash("sh1234", 10),
+  });
+
   await testUser1.save();
   await testUser2.save();
   await testUser3.save();
+  await testUser4.save();
 
   // add testUser2 to testUser1's friend list
   const testUser1Friend1 = new FriendModel({
