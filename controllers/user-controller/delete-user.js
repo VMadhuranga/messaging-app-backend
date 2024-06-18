@@ -16,7 +16,7 @@ const deleteUser = [
     }
 
     await FriendModel.deleteMany({
-      userID: req.params.user_id,
+      friend: req.params.user_id,
     }).exec();
 
     await MessageModel.deleteMany({
