@@ -13,7 +13,10 @@ const getUser = [
       return res.status(404).json({ message: "Resource not found" });
     }
 
-    const user = await UserModel.findById(req.params.user_id).exec();
+    const user = await UserModel.findById(
+      req.params.user_id,
+      "firstName lastName userName",
+    ).exec();
 
     if (!user) {
       return res.status(400).json({ message: "User not found" });
