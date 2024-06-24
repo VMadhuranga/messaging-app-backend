@@ -20,20 +20,18 @@ const refresh = async (req, res) => {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      const user = await UserModel.findOne({ userName: decoded.username })
-        .lean()
-        .exec();
+      const user = await UserModel.findOne({ _id: decoded.id }).lean().exec();
 
       if (!user) {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
       const accessToken = jwt.sign(
-        {
-          username: user.userName,
-        },
+        { id: user._id },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "10s" },
+        {
+          expiresIn: "10s",
+        },
       );
 
       res.json({ accessToken, userId: user._id });
