@@ -15,8 +15,8 @@ const updateUserUsername = [
       const existingUser = await UserModel.findOne({ userName: value })
         .lean()
         .exec();
-      if (existingUser && req.param.user_id !== existingUser._id) {
-        throw new Error("User already exist");
+      if (existingUser && req.params.user_id !== existingUser._id.toString()) {
+        throw new Error("User with this username already exist");
       }
     }),
 
