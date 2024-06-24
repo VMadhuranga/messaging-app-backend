@@ -62,19 +62,19 @@ const login = [
     }
 
     const accessToken = jwt.sign(
-      {
-        username: user.userName,
-      },
+      { id: user._id },
       process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "10s" },
+      {
+        expiresIn: "10s",
+      },
     );
 
     const refreshToken = jwt.sign(
-      {
-        username: user.userName,
-      },
+      { id: user._id },
       process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "1d" },
+      {
+        expiresIn: "1d",
+      },
     );
 
     res.cookie("jwt", refreshToken, {
