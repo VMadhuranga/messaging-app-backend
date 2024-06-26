@@ -1,11 +1,14 @@
-const mongoose = require("mongoose");
+const { connectTestDB } = require("../config/testDbConfig");
 
 let conn;
+let server;
 beforeEach(async () => {
-  conn = await mongoose.connect(process.env.MONGO_URI);
+  const { connection, mongoServer } = await connectTestDB();
+  conn = connection;
+  server = mongoServer;
 });
 
 afterEach(async () => {
-  await conn.connection.db.dropDatabase();
-  await mongoose.disconnect();
+  await conn.disconnect();
+  await server.stop();
 });
