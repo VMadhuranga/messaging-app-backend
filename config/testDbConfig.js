@@ -5,13 +5,11 @@ const UserModel = require("../models/user-model");
 const FriendModel = require("../models/friend-model");
 const MessageModel = require("../models/message-model");
 
-let mongoServer;
-
 async function connectTestDB() {
-  mongoServer = await MongoMemoryServer.create();
+  const mongoServer = await MongoMemoryServer.create();
   const mongoUri = mongoServer.getUri();
 
-  await mongoose.connect(mongoUri);
+  const connection = await mongoose.connect(mongoUri);
 
   // create test users
   const testUser1 = new UserModel({
@@ -76,12 +74,8 @@ async function connectTestDB() {
 
   await messageFromTestUser1ToTestUser2.save();
   await messageFromTestUser2ToTestUser1.save();
+
+  return { mongoServer, connection };
 }
 
-module.exports = {
-  Memory: true,
-  IP: "127.0.0.1",
-  Port: "27017",
-  Database: "testDB",
-  connectTestDB,
-};
+module.exports = { connectTestDB };
