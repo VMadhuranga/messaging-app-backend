@@ -1,8 +1,8 @@
 const express = require("express");
 const request = require("supertest");
 const bcrypt = require("bcryptjs");
-const authRouter = require("../../routes/auth-route");
 
+const authRouter = require("../../routes/auth-route");
 const UserModel = require("../../models/user-model");
 const userRouter = require("../../routes/user-route");
 
@@ -15,44 +15,29 @@ app.use("/", authRouter);
 app.use("/", userRouter);
 
 describe("PATCH /users/:user_id/password", () => {
-  const testUser = {
-    first_name: "john",
-    last_name: "doe",
-    username: "jd",
-    password: "jd1234",
-  };
   const newPassword = "jd1111";
-
-  let userID;
+  let user;
   let authHeader;
 
   beforeEach(async () => {
-    const newUser = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
-    const { id } = await newUser.save();
-    userID = id;
-
     const loginResponse = await request(app).post("/login").send({
-      username: testUser.username,
-      password: testUser.password,
+      username: "jd",
+      password: "jd1234",
     });
 
     authHeader = {
       field: "Authorization",
       value: `Bearer ${loginResponse.body.accessToken}`,
     };
+
+    user = await UserModel.findOne({ userName: "jd" }).lean().exec();
   });
 
   it("should give error message if /:user_id is wrong", async () => {
     const updateUserPasswordResponse = await request(app)
-      .patch(`/users/${userID}123/password`)
+      .patch(`/users/${user._id}123/password`)
       .send({
-        old_password: testUser.password,
+        old_password: "jd1234",
         new_password: newPassword,
         confirm_new_password: newPassword,
       })
@@ -64,7 +49,7 @@ describe("PATCH /users/:user_id/password", () => {
 
   it("should give error message if old password is missing", async () => {
     const updateUserPasswordResponse = await request(app)
-      .patch(`/users/${userID}/password`)
+      .patch(`/users/${user._id}/password`)
       .send({
         old_password: "",
         new_password: newPassword,
@@ -83,7 +68,7 @@ describe("PATCH /users/:user_id/password", () => {
 
   it("should give error message if old password is incorrect", async () => {
     const updateUserPasswordResponse = await request(app)
-      .patch(`/users/${userID}/password`)
+      .patch(`/users/${user._id}/password`)
       .send({
         old_password: "1234",
         new_password: newPassword,
@@ -102,9 +87,9 @@ describe("PATCH /users/:user_id/password", () => {
 
   it("should give error message if new passwords are not equal", async () => {
     const updateUserPasswordResponse = await request(app)
-      .patch(`/users/${userID}/password`)
+      .patch(`/users/${user._id}/password`)
       .send({
-        old_password: testUser.password,
+        old_password: "jd1234",
         new_password: newPassword,
         confirm_new_password: "1234",
       })
@@ -121,15 +106,15 @@ describe("PATCH /users/:user_id/password", () => {
 
   it("should update user password", async () => {
     const updateUserPasswordResponse = await request(app)
-      .patch(`/users/${userID}/password`)
+      .patch(`/users/${user._id}/password`)
       .send({
-        old_password: testUser.password,
+        old_password: "jd1234",
         new_password: newPassword,
         confirm_new_password: newPassword,
       })
       .set(authHeader.field, authHeader.value);
 
-    const updatedUser = await UserModel.findById(userID).lean().exec();
+    const updatedUser = await UserModel.findById(user._id).lean().exec();
     const match = await bcrypt.compare(newPassword, updatedUser.password);
 
     expect(match).toBeTruthy();

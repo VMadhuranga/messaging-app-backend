@@ -1,6 +1,5 @@
 const express = require("express");
 const request = require("supertest");
-const bcrypt = require("bcryptjs");
 
 const UserModel = require("../../models/user-model");
 const userRouter = require("../../routes/user-route");
@@ -15,53 +14,35 @@ app.use("/", authRouter);
 app.use("/", userRouter);
 
 describe("GET /users/:user_id", () => {
-  const testUser = {
-    first_name: "john",
-    last_name: "doe",
-    username: "jd",
-    password: "jd1234",
-  };
-
-  let userID;
+  let user;
   let authHeader;
 
   beforeEach(async () => {
-    const newUser = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
-    const { id } = await newUser.save();
-    userID = id;
-
     const loginResponse = await request(app).post("/login").send({
-      username: testUser.username,
-      password: testUser.password,
+      username: "jd",
+      password: "jd1234",
     });
 
     authHeader = {
       field: "Authorization",
       value: `Bearer ${loginResponse.body.accessToken}`,
     };
+
+    user = await UserModel.findOne({ userName: "jd" }).lean().exec();
   });
 
   it("should get user", async () => {
     const getUserResponse = await request(app)
-      .get(`/users/${userID}`)
+      .get(`/users/${user._id}`)
       .set(authHeader.field, authHeader.value);
-
-    const user = await UserModel.findById(userID).lean().exec();
 
     expect(getUserResponse.statusCode).toBe(200);
     expect(getUserResponse.body).toHaveProperty("user");
-    expect(user.userName).toBe(testUser.username);
   });
 
   it("should give error message if /:user_id is wrong", async () => {
     const getUserResponse = await request(app)
-      .get(`/users/${userID}+123`)
+      .get(`/users/${user._id}+123`)
       .set(authHeader.field, authHeader.value);
 
     expect(getUserResponse.statusCode).toBe(404);

@@ -1,8 +1,7 @@
 const express = require("express");
 const request = require("supertest");
-const bcrypt = require("bcryptjs");
-const authRouter = require("../../routes/auth-route");
 
+const authRouter = require("../../routes/auth-route");
 const UserModel = require("../../models/user-model");
 const userRouter = require("../../routes/user-route");
 
@@ -15,52 +14,30 @@ app.use("/", authRouter);
 app.use("/", userRouter);
 
 describe("PATCH /users/:user_id/username", () => {
-  const testUser = {
-    first_name: "john",
-    last_name: "doe",
-    username: "jd",
-    password: "jd1234",
-  };
-
-  const testUser2 = {
-    first_name: "jane",
-    last_name: "doe",
-    username: "jdoe",
-    password: "jd1234",
-  };
-
-  let userID;
+  let user;
   let authHeader;
 
   beforeEach(async () => {
-    const newUser = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
-    const { id } = await newUser.save();
-    userID = id;
-
     const loginResponse = await request(app).post("/login").send({
-      username: testUser.username,
-      password: testUser.password,
+      username: "jd",
+      password: "jd1234",
     });
 
     authHeader = {
       field: "Authorization",
       value: `Bearer ${loginResponse.body.accessToken}`,
     };
+
+    user = await UserModel.findOne({ userName: "jd" }).lean().exec();
   });
 
   it("should update user user name", async () => {
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${userID}/username`)
+      .patch(`/users/${user._id}/username`)
       .send({ username: "jdoe" })
       .set(authHeader.field, authHeader.value);
 
-    const updatedUser = await UserModel.findById(userID).lean().exec();
+    const updatedUser = await UserModel.findById(user._id).lean().exec();
 
     expect(updatedUser.userName).toBe("jdoe");
     expect(updateUserUsernameResponse.statusCode).toBe(200);
@@ -71,7 +48,7 @@ describe("PATCH /users/:user_id/username", () => {
 
   it("should give error message if /:user_id is wrong", async () => {
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${userID}123/username`)
+      .patch(`/users/${user._id}123/username`)
       .send({ username: "jdoe" })
       .set(authHeader.field, authHeader.value);
 
@@ -81,7 +58,7 @@ describe("PATCH /users/:user_id/username", () => {
 
   it("should give error message if user name is missing", async () => {
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${userID}/username`)
+      .patch(`/users/${user._id}/username`)
       .send({ username: "" })
       .set(authHeader.field, authHeader.value);
 
@@ -95,25 +72,16 @@ describe("PATCH /users/:user_id/username", () => {
   });
 
   it("should give error message if user name already exists", async () => {
-    const newUser2 = new UserModel({
-      firstName: testUser2.first_name,
-      lastName: testUser2.last_name,
-      userName: testUser2.username,
-      password: await bcrypt.hash(testUser2.password, 10),
-    });
-
-    await newUser2.save();
-
     const updateUserUsernameResponse = await request(app)
-      .patch(`/users/${userID}/username`)
-      .send({ username: "jdoe" })
+      .patch(`/users/${user._id}/username`)
+      .send({ username: "se" })
       .set(authHeader.field, authHeader.value);
 
     const error = updateUserUsernameResponse.body.data;
 
     expect(updateUserUsernameResponse.statusCode).toBe(400);
     expect(error.find((error) => error.path === "username").msg).toBe(
-      "User already exist",
+      "User with this username already exist",
     );
   });
 });

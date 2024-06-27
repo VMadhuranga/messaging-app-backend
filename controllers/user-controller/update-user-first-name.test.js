@@ -1,8 +1,7 @@
 const express = require("express");
 const request = require("supertest");
-const bcrypt = require("bcryptjs");
-const authRouter = require("../../routes/auth-route");
 
+const authRouter = require("../../routes/auth-route");
 const UserModel = require("../../models/user-model");
 const userRouter = require("../../routes/user-route");
 
@@ -15,45 +14,30 @@ app.use("/", authRouter);
 app.use("/", userRouter);
 
 describe("PATCH /users/:user_id/first_name", () => {
-  const testUser = {
-    first_name: "john",
-    last_name: "doe",
-    username: "jd",
-    password: "jd1234",
-  };
-
-  let userID;
+  let user;
   let authHeader;
 
   beforeEach(async () => {
-    const newUser = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
-    const { id } = await newUser.save();
-    userID = id;
-
     const loginResponse = await request(app).post("/login").send({
-      username: testUser.username,
-      password: testUser.password,
+      username: "jd",
+      password: "jd1234",
     });
 
     authHeader = {
       field: "Authorization",
       value: `Bearer ${loginResponse.body.accessToken}`,
     };
+
+    user = await UserModel.findOne({ userName: "jd" }).lean().exec();
   });
 
   it("should update user first name", async () => {
     const updateUserFirstNameResponse = await request(app)
-      .patch(`/users/${userID}/first_name`)
+      .patch(`/users/${user._id}/first_name`)
       .send({ first_name: "jane" })
       .set(authHeader.field, authHeader.value);
 
-    const updatedUser = await UserModel.findById(userID).lean().exec();
+    const updatedUser = await UserModel.findById(user._id).lean().exec();
 
     expect(updatedUser.firstName).toBe("jane");
     expect(updateUserFirstNameResponse.statusCode).toBe(200);
@@ -64,7 +48,7 @@ describe("PATCH /users/:user_id/first_name", () => {
 
   it("should give error message if /:user_id is wrong", async () => {
     const updateUserFirstNameResponse = await request(app)
-      .patch(`/users/${userID}123/first_name`)
+      .patch(`/users/${user._id}123/first_name`)
       .send({ first_name: "jane" })
       .set(authHeader.field, authHeader.value);
 
@@ -74,7 +58,7 @@ describe("PATCH /users/:user_id/first_name", () => {
 
   it("should give error message if first name is missing", async () => {
     const updateUserFirstNameResponse = await request(app)
-      .patch(`/users/${userID}/first_name`)
+      .patch(`/users/${user._id}/first_name`)
       .send({ first_name: "" })
       .set(authHeader.field, authHeader.value);
 

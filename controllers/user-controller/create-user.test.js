@@ -14,11 +14,11 @@ app.use("/", userRouter);
 describe("POST /users", () => {
   it("should create new user", async () => {
     const newUser = {
-      first_name: "john",
-      last_name: "doe",
-      username: "jd",
-      password: "jd1234",
-      confirm_password: "jd1234",
+      first_name: "will",
+      last_name: "smith",
+      username: "ws",
+      password: "ws1234",
+      confirm_password: "ws1234",
     };
 
     const createUserResponse = await request(app).post("/users").send(newUser);
@@ -49,29 +49,18 @@ describe("POST /users", () => {
   });
 
   it("should give error message if user name already exists", async () => {
-    const newUser1 = {
-      first_name: "will",
-      last_name: "smith",
-      username: "ws",
-      password: "ws1234",
-      confirm_password: "ws1234",
+    const newUser = {
+      first_name: "jane",
+      last_name: "doe",
+      username: "jd",
+      password: "jd1234",
+      confirm_password: "jd1234",
     };
 
-    const newUser2 = {
-      first_name: "william",
-      last_name: "summers",
-      username: "ws",
-      password: "ws1234",
-      confirm_password: "ws1234",
-    };
+    const userResponse = await request(app).post("/users").send(newUser);
+    const errors = userResponse.body.data;
 
-    // create new user
-    await request(app).post("/users").send(newUser1);
-
-    const user2Response = await request(app).post("/users").send(newUser2);
-    const errors = user2Response.body.data;
-
-    expect(user2Response.statusCode).toBe(400);
+    expect(userResponse.statusCode).toBe(400);
     expect(errors.find((error) => error.path === "username").msg).toBe(
       "User with this username already exist",
     );
