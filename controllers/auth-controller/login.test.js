@@ -1,8 +1,6 @@
 const express = require("express");
 const request = require("supertest");
-const bcrypt = require("bcryptjs");
 
-const UserModel = require("../../models/user-model");
 const authRouter = require("../../routes/auth-route");
 
 const app = express();
@@ -13,28 +11,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/", authRouter);
 
 describe("POST /login", () => {
-  const testUser = {
-    first_name: "john",
-    last_name: "doe",
-    username: "jd",
-    password: "jd1234",
-  };
-
-  beforeEach(async () => {
-    const newUser = new UserModel({
-      firstName: testUser.first_name,
-      lastName: testUser.last_name,
-      userName: testUser.username,
-      password: await bcrypt.hash(testUser.password, 10),
-    });
-
-    await newUser.save();
-  });
-
   it("should log in user if username and password are correct", async () => {
     const loginResponse = await request(app).post("/login").send({
-      username: testUser.username,
-      password: testUser.password,
+      username: "jd",
+      password: "jd1234",
     });
 
     const cookie = loginResponse.headers["set-cookie"][0].split("=")[0];
@@ -46,7 +26,7 @@ describe("POST /login", () => {
   it("should give error message if username is incorrect", async () => {
     const loginResponse = await request(app).post("/login").send({
       username: "j",
-      password: testUser.password,
+      password: "jd1234",
     });
 
     const errors = loginResponse.body.data;
@@ -58,7 +38,7 @@ describe("POST /login", () => {
 
   it("should give error message if password is incorrect", async () => {
     const loginResponse = await request(app).post("/login").send({
-      username: testUser.username,
+      username: "jd",
       password: "j",
     });
 
