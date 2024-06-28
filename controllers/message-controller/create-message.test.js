@@ -1,6 +1,5 @@
 const express = require("express");
 const request = require("supertest");
-const bcrypt = require("bcryptjs");
 
 const UserModel = require("../../models/user-model");
 const MessageModel = require("../../models/message-model");
@@ -16,75 +15,36 @@ app.use("/", authRouter);
 app.use("/", userRouter);
 
 describe("POST /users/:user_id/friends/:friend_id/messages", () => {
-  const testUser1 = {
-    first_name: "john",
-    last_name: "doe",
-    username: "jd",
-    password: "jd1234",
-  };
-
-  const testUser2 = {
-    first_name: "will",
-    last_name: "smith",
-    username: "ws",
-    password: "ws1234",
-  };
-
-  let userID1;
-  let userID2;
+  let user;
+  let user2;
   let authHeader;
 
   beforeEach(async () => {
-    const newUser1 = new UserModel({
-      firstName: testUser1.first_name,
-      lastName: testUser1.last_name,
-      userName: testUser1.username,
-      password: await bcrypt.hash(testUser1.password, 10),
-    });
-
-    const newUser2 = new UserModel({
-      firstName: testUser2.first_name,
-      lastName: testUser2.last_name,
-      userName: testUser2.username,
-      password: await bcrypt.hash(testUser2.password, 10),
-    });
-
-    const { id: id1 } = await newUser1.save();
-    const { id: id2 } = await newUser2.save();
-
-    userID1 = id1;
-    userID2 = id2;
-
     const loginResponse = await request(app).post("/login").send({
-      username: testUser1.username,
-      password: testUser1.password,
+      username: "jd",
+      password: "jd1234",
     });
 
     authHeader = {
       field: "Authorization",
       value: `Bearer ${loginResponse.body.accessToken}`,
     };
+
+    user = await UserModel.findOne({ userName: "jd" }).lean().exec();
+    user2 = await UserModel.findOne({ userName: "se" }).lean().exec();
   });
 
   it("should create message", async () => {
-    // add friend to user's friend list
-    await request(app)
-      .post(`/users/${userID1}/friends`)
-      .send({
-        friend_id: userID2,
-      })
-      .set(authHeader.field, authHeader.value);
-
     const createMessageResponse = await request(app)
-      .post(`/users/${userID1}/friends/${userID2}/messages`)
+      .post(`/users/${user._id}/friends/${user2._id}/messages`)
       .send({
         message: "hello",
       })
       .set(authHeader.field, authHeader.value);
 
     const message = await MessageModel.findOne({
-      senderID: userID1,
-      receiverID: userID2,
+      senderID: user._id,
+      receiverID: user2._id,
     })
       .lean()
       .exec();
@@ -97,16 +57,8 @@ describe("POST /users/:user_id/friends/:friend_id/messages", () => {
   });
 
   it("should give error message if /:user_id is wrong", async () => {
-    // add friend to user's friend list
-    await request(app)
-      .post(`/users/${userID1}/friends`)
-      .send({
-        friend_id: userID2,
-      })
-      .set(authHeader.field, authHeader.value);
-
     const createMessageResponse = await request(app)
-      .post(`/users/${userID1}123/friends/${userID2}/messages`)
+      .post(`/users/${user._id}123/friends/${user2._id}/messages`)
       .send({
         message: "hello",
       })
@@ -117,16 +69,8 @@ describe("POST /users/:user_id/friends/:friend_id/messages", () => {
   });
 
   it("should give error message if /:friend_id is wrong", async () => {
-    // add friend to user's friend list
-    await request(app)
-      .post(`/users/${userID1}/friends`)
-      .send({
-        friend_id: userID2,
-      })
-      .set(authHeader.field, authHeader.value);
-
     const createMessageResponse = await request(app)
-      .post(`/users/${userID1}/friends/${userID2}123/messages`)
+      .post(`/users/${user._id}/friends/${user2._id}123/messages`)
       .send({
         message: "hello",
       })
@@ -137,16 +81,8 @@ describe("POST /users/:user_id/friends/:friend_id/messages", () => {
   });
 
   it("should give error message if message is empty", async () => {
-    // add friend to user's friend list
-    await request(app)
-      .post(`/users/${userID1}/friends`)
-      .send({
-        friend_id: userID2,
-      })
-      .set(authHeader.field, authHeader.value);
-
     const createMessageResponse = await request(app)
-      .post(`/users/${userID1}/friends/${userID2}/messages`)
+      .post(`/users/${user._id}/friends/${user2._id}/messages`)
       .send({
         message: "",
       })
