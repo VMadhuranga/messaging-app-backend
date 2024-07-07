@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const errorHandler = require("./middlewares/errorHandler");
 const connectDB = require("./config/dbConfig");
 const { connectTestDB } = require("./config/testDbConfig");
@@ -16,6 +18,10 @@ const authRouter = require("./routes/auth-route");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: { origin: [process.env.FRONTEND_URL], credentials: true },
+});
 
 if (process.env.NODE_ENV === "development") {
   connectTestDB();
@@ -37,9 +43,37 @@ app.use("/", userRouter);
 
 app.use(errorHandler);
 
+// socket io
+io.use((socket, next) => {
+  const userId = socket.handshake.auth.userId;
+  if (!userId) {
+    return next(new Error("invalid userId"));
+  }
+  socket.userId = userId;
+  next();
+});
+
+io.on("connection", (socket) => {
+  const users = new Map();
+  for (const [id, soc] of io.of("/").sockets) {
+    users.set(soc.userId, id);
+  }
+
+  socket.on("message", ({ content, to }) => {
+    const data = {
+      content,
+      _id: crypto.randomUUID(),
+      senderID: socket.userId,
+      date: Date(),
+    };
+    socket.emit("message", data);
+    socket.to(users.get(to)).emit("message", data);
+  });
+});
+
 mongoose.connection.once("open", () => {
   console.log("Connected to MongoDB");
-  app.listen(PORT, () => {
+  httpServer.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
   });
 });
