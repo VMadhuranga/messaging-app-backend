@@ -32,7 +32,13 @@ if (process.env.NODE_ENV === "development") {
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors({ origin: [process.env.FRONTEND_URL], credentials: true }));
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_URL],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 app.use(cookieParser());
 app.use(helmet());
 app.use(compression());
@@ -53,8 +59,8 @@ io.use((socket, next) => {
   next();
 });
 
+const users = new Map();
 io.on("connection", (socket) => {
-  const users = new Map();
   for (const [id, soc] of io.of("/").sockets) {
     users.set(soc.userId, id);
   }
