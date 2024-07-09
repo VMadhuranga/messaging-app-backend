@@ -7,8 +7,7 @@ const loginLimiter = rateLimit({
     message:
       "Too many login attempts, please try again after a 60 second pause",
   },
-  standardHeaders: true,
-  legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
 });
 
 module.exports = loginLimiter;
