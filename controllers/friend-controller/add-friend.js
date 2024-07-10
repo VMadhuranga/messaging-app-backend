@@ -18,14 +18,23 @@ const addFriend = [
       return res.status(404).json({ message: "Resource not found" });
     }
 
-    await FriendModel.create({
+    const friend = await FriendModel.findOne({
       user: req.params.user_id,
       friend: req.body.friend_id,
-    });
-    await FriendModel.create({
-      user: req.body.friend_id,
-      friend: req.params.user_id,
-    });
+    })
+      .lean()
+      .exec();
+
+    if (!friend) {
+      await FriendModel.create({
+        user: req.params.user_id,
+        friend: req.body.friend_id,
+      });
+      await FriendModel.create({
+        user: req.body.friend_id,
+        friend: req.params.user_id,
+      });
+    }
 
     res.status(201).json({ message: "Friend added successfully" });
   }),
