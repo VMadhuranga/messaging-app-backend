@@ -38,7 +38,3 @@ To run tests, run the following command
 ```bash
 npm run test
 ```
-
-## Acknowledgements
-
-This project is part of [The Odin Project](https://www.theodinproject.com/), a free online course to learn full-stack web development.
