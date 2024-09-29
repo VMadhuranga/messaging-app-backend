@@ -35,8 +35,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Accept", "Content-Type", "Authorization", "X-CSRF-Token"],
+    exposedHeaders: ["Link"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    maxAge: 300,
   }),
 );
 app.use(cookieParser());
